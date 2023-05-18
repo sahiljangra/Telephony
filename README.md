@@ -15,9 +15,10 @@
 |:exclamation: Use Only for Android|
 |------------------------------------------------------------------|
 
-Updated
+New Update
 - Enable Background Service
 - Send SMS on lower android version
+
 
 A Flutter plugin to use telephony features such as
 - Send SMS Messages
