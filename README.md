@@ -12,7 +12,7 @@
 
 ## Thank you for checking out the Telephony plugin.
 
-|:exclamation: This plugin currently only works on Android Platform|
+|:exclamation: Use Only for Android|
 |------------------------------------------------------------------|
 
 
