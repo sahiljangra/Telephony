@@ -146,17 +146,13 @@ class SmsController(private val context: Context) {
         } else {
             SmsManager.getDefault()
         }
-          // if (subscriptionId != SubscriptionManager.INVALID_SUBSCRIPTION_ID) {
-//            return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-//                smsManager.createForSubscriptionId(0);
-//            } else {
-//                SmsManager.getSmsManagerForSubscriptionId(0);
-//            }
-//        }
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            smsManager.createForSubscriptionId(0);
-        } else {
-            SmsManager.getSmsManagerForSubscriptionId(0);
+        @RequiresApi(Build.VERSION_CODES.LOLLIPOP_MR1)
+        fun getSmsManagerForSubscriptionId(context: Context, subId: Int): SmsManager {
+            return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
+                context.getSystemService(SmsManager::class.java).createForSubscriptionId(1)
+            else
+                @Suppress("DEPRECATION")
+                SmsManager.getSmsManagerForSubscriptionId(1)
         }
         return smsManager
     }
