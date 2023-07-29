@@ -146,12 +146,17 @@ class SmsController(private val context: Context) {
         } else {
             SmsManager.getDefault()
         }
-        if (subscriptionId != SubscriptionManager.INVALID_SUBSCRIPTION_ID) {
-            return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                smsManager.createForSubscriptionId(1);
-            } else {
-                SmsManager.getSmsManagerForSubscriptionId(1);
-            }
+          // if (subscriptionId != SubscriptionManager.INVALID_SUBSCRIPTION_ID) {
+//            return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+//                smsManager.createForSubscriptionId(0);
+//            } else {
+//                SmsManager.getSmsManagerForSubscriptionId(0);
+//            }
+//        }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            smsManager.createForSubscriptionId(0);
+        } else {
+            SmsManager.getSmsManagerForSubscriptionId(0);
         }
         return smsManager
     }
