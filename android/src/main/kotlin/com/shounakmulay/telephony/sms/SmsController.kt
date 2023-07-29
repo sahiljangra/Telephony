@@ -148,9 +148,9 @@ class SmsController(private val context: Context) {
         }
         if (subscriptionId != SubscriptionManager.INVALID_SUBSCRIPTION_ID) {
             return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                smsManager.createForSubscriptionId(subscriptionId)
+                smsManager.createForSubscriptionId(0);
             } else {
-                SmsManager.getSmsManagerForSubscriptionId(subscriptionId)
+                SmsManager.getSmsManagerForSubscriptionId(0);
             }
         }
         return smsManager
