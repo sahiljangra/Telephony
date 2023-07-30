@@ -1,7 +1,6 @@
 package com.shounakmulay.telephony.sms
 
 import android.Manifest
-import android.R
 import android.annotation.SuppressLint
 import android.app.PendingIntent
 import android.content.Context
@@ -9,10 +8,8 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Build
 import android.telephony.*
-import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.annotation.RequiresPermission
-import androidx.core.content.ContextCompat.getSystemService
 import com.shounakmulay.telephony.utils.Constants.ACTION_SMS_DELIVERED
 import com.shounakmulay.telephony.utils.Constants.ACTION_SMS_SENT
 import com.shounakmulay.telephony.utils.Constants.SMS_BODY
@@ -59,34 +56,46 @@ class SmsController(private val context: Context) {
 
     // SEND SMS
     @SuppressLint("MissingPermission")
-    fun sendSms(destinationAddress: String, messageBody: String, listenStatus: Boolean) {
-        // val localSubscriptionManager = SubscriptionManager.from(context)
-        // if (localSubscriptionManager.activeSubscriptionInfoCount > 1) {
-        //     val localList: List<*> = localSubscriptionManager.activeSubscriptionInfoList
-        //     val simInfo1 = localList[simState] as SubscriptionInfo
-        //     val simInfo2 = localList[simState] as SubscriptionInfo
+    fun sendSms(destinationAddress: String, messageBody: String, listenStatus: Boolean, secondSim: Boolean) {
 
-        //     //SendSMS From SIM One
-        //     SmsManager.getSmsManagerForSubscriptionId(simInfo1.subscriptionId)
-        //         .sendTextMessage(destinationAddress, null, messageBody, null, null)
+        val localSubscriptionManager = SubscriptionManager.from(context)
+        if (localSubscriptionManager.activeSubscriptionInfoCount > 1) {
+            val localList: List<*> = localSubscriptionManager.activeSubscriptionInfoList
+            var simSlot: Int = 0
+            simSlot = if(secondSim) 1 else { 0 }
+            val simInfo = localList[simSlot] as SubscriptionInfo
+            if (listenStatus) {
+                val pendingIntents = getPendingIntents()
+                SmsManager.getSmsManagerForSubscriptionId(simInfo.subscriptionId)
+                    .sendTextMessage(destinationAddress,
+                        null,
+                        messageBody,
+                        pendingIntents.first,
+                        pendingIntents.second
+                    )
+            }else{
+                SmsManager.getSmsManagerForSubscriptionId(simInfo.subscriptionId)
+                    .sendTextMessage(destinationAddress, null, messageBody, null, null)
+            }
 
-        //     //SendSMS From SIM Two
-        //     SmsManager.getSmsManagerForSubscriptionId(simInfo2.subscriptionId)
-        //         .sendTextMessage(destinationAddress, null, messageBody, null, null)
-        // }
-       val smsManager = getSmsManager()
-       if (listenStatus) {
-           val pendingIntents = getPendingIntents()
-           smsManager.sendTextMessage(
-               destinationAddress,
-               null,
-               messageBody,
-               pendingIntents.first,
-               pendingIntents.second
-           )
-       } else {
-           smsManager.sendTextMessage(destinationAddress, null, messageBody, null, null)
-       }
+        }else{
+            val smsManager = getSmsManager()
+            if (listenStatus) {
+                val pendingIntents = getPendingIntents()
+                smsManager.sendTextMessage(
+                    destinationAddress,
+                    null,
+                    messageBody,
+                    pendingIntents.first,
+                    pendingIntents.second
+                )
+            } else {
+                smsManager.sendTextMessage(destinationAddress, null, messageBody, null, null)
+            }
+        }
+
+
+
     }
 
     fun sendMultipartSms(destinationAddress: String, messageBody: String, listenStatus: Boolean) {
@@ -154,8 +163,11 @@ class SmsController(private val context: Context) {
 
     private fun getSmsManager(): SmsManager {
         val subscriptionId = SmsManager.getDefaultSmsSubscriptionId()
-        val smsManager = getSystemService(context, SmsManager::class.java)
-            ?: throw RuntimeException("Flutter Telephony: Error getting SmsManager")
+        val smsManager = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            context.getSystemService(SmsManager::class.java)
+        } else {
+            SmsManager.getDefault()
+        }
         if (subscriptionId != SubscriptionManager.INVALID_SUBSCRIPTION_ID) {
             return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                 smsManager.createForSubscriptionId(subscriptionId)
