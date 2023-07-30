@@ -305,6 +305,7 @@ class Telephony {
     required String message,
     SmsSendStatusListener? statusListener,
     bool isMultipart = false,
+    int slot,
   }) async {
     assert(_platform.isAndroid == true, "Can only be called on Android.");
     bool listenStatus = false;
