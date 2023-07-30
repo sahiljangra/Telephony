@@ -46,8 +46,9 @@ object Constants {
   const val SELECTION_ARGS = "selection_args"
   const val SORT_ORDER = "sort_order"
   const val MESSAGE_BODY = "message_body"
-  const val ADDRESS = "address"
   const val LISTEN_STATUS = "listen_status"
+  const val ADDRESS = "address"
+  const val SECOND_SIM = "secondSim"
   const val SERVICE_CENTER_ADDRESS = "service_center"
 
   const val TIMESTAMP = "timestamp"
