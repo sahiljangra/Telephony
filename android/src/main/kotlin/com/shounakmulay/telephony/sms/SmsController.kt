@@ -59,37 +59,34 @@ class SmsController(private val context: Context) {
 
     // SEND SMS
     @SuppressLint("MissingPermission")
-    fun sendSms(destinationAddress: String, messageBody: String, listenStatus: Boolean, simState : Int) {
+    fun sendSms(destinationAddress: String, messageBody: String, listenStatus: Boolean) {
+        // val localSubscriptionManager = SubscriptionManager.from(context)
+        // if (localSubscriptionManager.activeSubscriptionInfoCount > 1) {
+        //     val localList: List<*> = localSubscriptionManager.activeSubscriptionInfoList
+        //     val simInfo1 = localList[simState] as SubscriptionInfo
+        //     val simInfo2 = localList[simState] as SubscriptionInfo
 
-        val localSubscriptionManager = SubscriptionManager.from(context)
-        if (localSubscriptionManager.activeSubscriptionInfoCount > 1) {
-            val localList: List<*> = localSubscriptionManager.activeSubscriptionInfoList
-            val simInfo1 = localList[simState] as SubscriptionInfo
-            val simInfo2 = localList[simState] as SubscriptionInfo
+        //     //SendSMS From SIM One
+        //     SmsManager.getSmsManagerForSubscriptionId(simInfo1.subscriptionId)
+        //         .sendTextMessage(destinationAddress, null, messageBody, null, null)
 
-            //SendSMS From SIM One
-            SmsManager.getSmsManagerForSubscriptionId(simInfo1.subscriptionId)
-                .sendTextMessage(destinationAddress, null, messageBody, null, null)
-
-            //SendSMS From SIM Two
-            SmsManager.getSmsManagerForSubscriptionId(simInfo2.subscriptionId)
-                .sendTextMessage(destinationAddress, null, messageBody, null, null)
-        }
-
-
-//        val smsManager = getSmsManager()
-//        if (listenStatus) {
-//            val pendingIntents = getPendingIntents()
-//            smsManager.sendTextMessage(
-//                destinationAddress,
-//                null,
-//                messageBody,
-//                pendingIntents.first,
-//                pendingIntents.second
-//            )
-//        } else {
-//            smsManager.sendTextMessage(destinationAddress, null, messageBody, null, null)
-//        }
+        //     //SendSMS From SIM Two
+        //     SmsManager.getSmsManagerForSubscriptionId(simInfo2.subscriptionId)
+        //         .sendTextMessage(destinationAddress, null, messageBody, null, null)
+        // }
+       val smsManager = getSmsManager()
+       if (listenStatus) {
+           val pendingIntents = getPendingIntents()
+           smsManager.sendTextMessage(
+               destinationAddress,
+               null,
+               messageBody,
+               pendingIntents.first,
+               pendingIntents.second
+           )
+       } else {
+           smsManager.sendTextMessage(destinationAddress, null, messageBody, null, null)
+       }
     }
 
     fun sendMultipartSms(destinationAddress: String, messageBody: String, listenStatus: Boolean) {
