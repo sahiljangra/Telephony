@@ -304,7 +304,8 @@ class Telephony {
     required String to,
     required String message,
     SmsSendStatusListener? statusListener,
-    bool isMultipart = false,    
+    bool isMultipart = false,
+    bool secondSimSlote = false,
   }) async {
     assert(_platform.isAndroid == true, "Can only be called on Android.");
     bool listenStatus = false;
@@ -315,7 +316,8 @@ class Telephony {
     final Map<String, dynamic> args = {
       "address": to,
       "message_body": message,
-      "listen_status": listenStatus
+      "listen_status": listenStatus,
+      "secondSim": secondSimSlote,
     };
     final String method = isMultipart ? SEND_MULTIPART_SMS : SEND_SMS;
     await _foregroundChannel.invokeMethod(method, args);
