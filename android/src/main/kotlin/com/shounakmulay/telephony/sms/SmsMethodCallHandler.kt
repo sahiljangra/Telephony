@@ -13,6 +13,7 @@ import com.shounakmulay.telephony.PermissionsController
 import com.shounakmulay.telephony.utils.ActionType
 import com.shounakmulay.telephony.utils.Constants
 import com.shounakmulay.telephony.utils.Constants.ADDRESS
+import com.shounakmulay.telephony.utils.Constants.SECOND_SIM
 import com.shounakmulay.telephony.utils.Constants.BACKGROUND_HANDLE
 import com.shounakmulay.telephony.utils.Constants.CALL_REQUEST_CODE
 import com.shounakmulay.telephony.utils.Constants.DEFAULT_CONVERSATION_PROJECTION
@@ -66,6 +67,7 @@ class SmsMethodCallHandler(
 
   private lateinit var messageBody: String
   private lateinit var address: String
+  private var secondSim: Boolean = false
   private var listenStatus: Boolean = false
 
   private var setupHandle: Long = -1
@@ -96,9 +98,11 @@ class SmsMethodCallHandler(
       }
       ActionType.SEND_SMS -> {
         if (call.hasArgument(MESSAGE_BODY)
-            && call.hasArgument(ADDRESS)) {
+            && call.hasArgument(ADDRESS) && call.hasArgument(SECOND_SIM)) {
+
           val messageBody = call.argument<String>(MESSAGE_BODY)
           val address = call.argument<String>(ADDRESS)
+
           if (messageBody.isNullOrBlank() || address.isNullOrBlank()) {
             result.error(ILLEGAL_ARGUMENT, Constants.MESSAGE_OR_ADDRESS_CANNOT_BE_NULL, null)
             return
@@ -108,6 +112,7 @@ class SmsMethodCallHandler(
           this.address = address
 
           listenStatus = call.argument(LISTEN_STATUS) ?: false
+          secondSim = call.argument(SECOND_SIM) ?: false
         }
         handleMethod(action, SMS_SEND_REQUEST_CODE)
       }
@@ -194,7 +199,7 @@ class SmsMethodCallHandler(
       context.applicationContext.registerReceiver(this, intentFilter)
     }
     when (smsAction) {
-      SmsAction.SEND_SMS -> smsController.sendSms(address, messageBody, listenStatus)
+      SmsAction.SEND_SMS -> smsController.sendSms(address, messageBody, listenStatus, secondSim)
       SmsAction.SEND_MULTIPART_SMS -> smsController.sendMultipartSms(address, messageBody, listenStatus)
       SmsAction.SEND_SMS_INTENT -> smsController.sendSmsIntent(address, messageBody)
       else -> throw IllegalArgumentException()
