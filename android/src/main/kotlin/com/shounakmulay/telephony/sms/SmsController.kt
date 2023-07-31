@@ -57,7 +57,6 @@ class SmsController(private val context: Context) {
     // SEND SMS
     @SuppressLint("MissingPermission")
     fun sendSms(destinationAddress: String, messageBody: String, listenStatus: Boolean, secondSim: Boolean) {
-
         val localSubscriptionManager = SubscriptionManager.from(context)
         if (localSubscriptionManager.activeSubscriptionInfoCount > 1) {
             val localList: List<*> = localSubscriptionManager.activeSubscriptionInfoList
@@ -77,7 +76,6 @@ class SmsController(private val context: Context) {
                 SmsManager.getSmsManagerForSubscriptionId(simInfo.subscriptionId)
                     .sendTextMessage(destinationAddress, null, messageBody, null, null)
             }
-
         }else{
             val smsManager = getSmsManager()
             if (listenStatus) {
@@ -93,25 +91,65 @@ class SmsController(private val context: Context) {
                 smsManager.sendTextMessage(destinationAddress, null, messageBody, null, null)
             }
         }
-
-
-
     }
 
-    fun sendMultipartSms(destinationAddress: String, messageBody: String, listenStatus: Boolean) {
-        val smsManager = getSmsManager()
-        val messageParts = smsManager.divideMessage(messageBody)
-        if (listenStatus) {
-            val pendingIntents = getMultiplePendingIntents(messageParts.size)
-            smsManager.sendMultipartTextMessage(
-                destinationAddress,
-                null,
-                messageParts,
-                pendingIntents.first,
-                pendingIntents.second
-            )
-        } else {
-            smsManager.sendMultipartTextMessage(destinationAddress, null, messageParts, null, null)
+    @SuppressLint("MissingPermission")
+    fun sendMultipartSms(destinationAddress: String, messageBody: String, listenStatus: Boolean, secondSim: Boolean) {
+        val localSubscriptionManager = SubscriptionManager.from(context)
+        if (localSubscriptionManager.activeSubscriptionInfoCount > 1) {
+            val localList: List<*> = localSubscriptionManager.activeSubscriptionInfoList
+            var simSlot: Int = 0
+            simSlot = if(secondSim) 1 else { 0 }
+            val simInfo = localList[simSlot] as SubscriptionInfo
+            if (listenStatus) {
+                 val sm: SmsManager = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                   context.getSystemService(SmsManager::class.java)
+                 } else {
+                   @Suppress("DEPRECATION")
+                   SmsManager.getDefault()
+                 }
+                val messageParts: ArrayList<String> = sm.divideMessage(messageBody)
+                val pendingIntents = getMultiplePendingIntents(messageParts.size)
+                SmsManager.getSmsManagerForSubscriptionId(simInfo.subscriptionId)
+                    .sendMultipartTextMessage(
+                    destinationAddress,
+                    null,
+                    messageParts,
+                    pendingIntents.first,
+                    pendingIntents.second
+                )
+            }else{
+                val sm: SmsManager = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                    context.getSystemService(SmsManager::class.java)
+                } else {
+                    @Suppress("DEPRECATION")
+                    SmsManager.getDefault()
+                }
+                val messageParts: ArrayList<String> = sm.divideMessage(messageBody)
+                SmsManager.getSmsManagerForSubscriptionId(simInfo.subscriptionId)
+                    .sendMultipartTextMessage(
+                        destinationAddress,
+                        null,
+                        messageParts,
+                        null,
+                        null
+                    )
+            }
+        }else{
+            val smsManager = getSmsManager()
+            val messageParts = smsManager.divideMessage(messageBody)
+            if (listenStatus) {
+                val pendingIntents = getMultiplePendingIntents(messageParts.size)
+                smsManager.sendMultipartTextMessage(
+                    destinationAddress,
+                    null,
+                    messageParts,
+                    pendingIntents.first,
+                    pendingIntents.second
+                )
+            } else {
+                smsManager.sendMultipartTextMessage(destinationAddress, null, messageParts, null, null)
+            }
         }
     }
 
@@ -173,6 +211,23 @@ class SmsController(private val context: Context) {
                 smsManager.createForSubscriptionId(subscriptionId)
             } else {
                 SmsManager.getSmsManagerForSubscriptionId(subscriptionId)
+            }
+        }
+        return smsManager
+    }
+
+    private fun getSmsManagerNew(simSlot: Int): SmsManager {
+        val subscriptionId = SmsManager.getDefaultSmsSubscriptionId()
+        val smsManager = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            context.getSystemService(SmsManager::class.java)
+        } else {
+            SmsManager.getDefault()
+        }
+        if (subscriptionId != SubscriptionManager.INVALID_SUBSCRIPTION_ID) {
+            return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                smsManager.createForSubscriptionId(simSlot)
+            } else {
+                SmsManager.getSmsManagerForSubscriptionId(simSlot)
             }
         }
         return smsManager
