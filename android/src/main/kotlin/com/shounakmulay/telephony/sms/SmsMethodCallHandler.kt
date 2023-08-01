@@ -200,7 +200,7 @@ class SmsMethodCallHandler(
     }
     when (smsAction) {
       SmsAction.SEND_SMS -> smsController.sendSms(address, messageBody, listenStatus, secondSim)
-      SmsAction.SEND_MULTIPART_SMS -> smsController.sendMultipartSms(address, messageBody, listenStatus)
+      SmsAction.SEND_MULTIPART_SMS -> smsController.sendMultipartSms(address, messageBody, listenStatus, secondSim)
       SmsAction.SEND_SMS_INTENT -> smsController.sendSmsIntent(address, messageBody)
       else -> throw IllegalArgumentException()
     }
